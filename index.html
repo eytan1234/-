@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+<meta charset="UTF-8">
+<title>מערכת בחירות</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:linear-gradient(to bottom,#f0f4f8,#d6eaf8);
+text-align:center;
+padding:40px;
+}
+
+input{
+padding:10px;
+margin:5px;
+border-radius:8px;
+border:1px solid #ccc;
+}
+
+button{
+padding:12px 20px;
+border:none;
+border-radius:10px;
+background:#00bcd4;
+color:white;
+font-weight:bold;
+cursor:pointer;
+}
+
+button:hover{
+background:#0097a7;
+}
+
+.poll-card{
+background:white;
+padding:20px;
+margin:20px auto;
+max-width:400px;
+border-radius:12px;
+box-shadow:0 4px 10px rgba(0,0,0,0.2);
+}
+
+.candidate{
+background:#e0f7fa;
+padding:10px;
+margin:6px;
+border-radius:8px;
+cursor:pointer;
+}
+
+.candidate:hover{
+background:#b2ebf2;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>בחירות</h1>
+
+<input id="pollCode" placeholder="קוד קלפי">
+<input id="voterCode" placeholder="קוד מצביע">
+
+<br>
+
+<button onclick="openPoll()">פתח קלפי</button>
+
+<button onclick="enterAdmin()">כניסה למנהל</button>
+
+<div id="pollArea"></div>
+
+<script>
+
+let polls = JSON.parse(localStorage.getItem("polls")) || {};
+
+let adminCode = localStorage.getItem("adminCode") || "ADMIN123";
+
+function enterAdmin(){
+
+const code = prompt("הכנס קוד מנהל");
+
+if(code === adminCode){
+
+window.location.href="admin.html";
+
+}else{
+
+alert("קוד מנהל שגוי");
+
+}
+
+}
+
+function openPoll(){
+
+const pollCode=document.getElementById("pollCode").value;
+
+const voterCode=document.getElementById("voterCode").value;
+
+const poll=polls[pollCode];
+
+if(!poll){
+
+alert("קלפי לא קיימת");
+
+return;
+
+}
+
+if(!poll.codes.includes(voterCode)){
+
+alert("קוד מצביע שגוי");
+
+return;
+
+}
+
+if(poll.usedCodes.includes(voterCode)){
+
+alert("כבר הצבעת");
+
+return;
+
+}
+
+renderPoll(pollCode,voterCode);
+
+}
+
+function renderPoll(code,voterCode){
+
+const poll=polls[code];
+
+const div=document.getElementById("pollArea");
+
+div.innerHTML="";
+
+const card=document.createElement("div");
+
+card.className="poll-card";
+
+card.innerHTML=`<h2>${poll.name}</h2>`;
+
+poll.candidates.forEach(c=>{
+
+const el=document.createElement("div");
+
+el.className="candidate";
+
+el.innerText=c;
+
+el.onclick=()=>vote(code,c,voterCode);
+
+card.appendChild(el);
+
+});
+
+div.appendChild(card);
+
+}
+
+function vote(pollCode,candidate,voterCode){
+
+polls[pollCode].votes[candidate]=(polls[pollCode].votes[candidate]||0)+1;
+
+polls[pollCode].usedCodes.push(voterCode);
+
+localStorage.setItem("polls",JSON.stringify(polls));
+
+alert("ההצבעה נשמרה");
+
+location.reload();
+
+}
+
+</script>
+
+</body>
+</html>
