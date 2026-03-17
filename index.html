@@ -5,7 +5,6 @@
 <title>מערכת בחירות</title>
 
 <style>
-
 body{
 font-family:Arial;
 background:linear-gradient(to bottom,#f0f4f8,#d6eaf8);
@@ -50,11 +49,6 @@ margin:6px;
 border-radius:8px;
 cursor:pointer;
 }
-
-.candidate:hover{
-background:#b2ebf2;
-}
-
 </style>
 </head>
 
@@ -68,7 +62,6 @@ background:#b2ebf2;
 <br>
 
 <button onclick="openPoll()">פתח קלפי</button>
-
 <button onclick="enterAdmin()">כניסה למנהל</button>
 
 <div id="pollArea"></div>
@@ -76,105 +69,108 @@ background:#b2ebf2;
 <script>
 
 let polls = JSON.parse(localStorage.getItem("polls")) || {};
-
 let adminCode = localStorage.getItem("adminCode") || "ADMIN123";
 
 function enterAdmin(){
-
 const code = prompt("הכנס קוד מנהל");
-
 if(code === adminCode){
-
 window.location.href="admin.html";
-
 }else{
-
 alert("קוד מנהל שגוי");
-
 }
-
 }
 
 function openPoll(){
 
 const pollCode=document.getElementById("pollCode").value;
-
 const voterCode=document.getElementById("voterCode").value;
-
 const poll=polls[pollCode];
 
 if(!poll){
-
 alert("קלפי לא קיימת");
-
 return;
-
 }
 
 if(!poll.codes.includes(voterCode)){
-
 alert("קוד מצביע שגוי");
-
 return;
-
 }
 
 if(poll.usedCodes.includes(voterCode)){
-
 alert("כבר הצבעת");
-
 return;
-
 }
 
 renderPoll(pollCode,voterCode);
-
 }
 
 function renderPoll(code,voterCode){
 
 const poll=polls[code];
-
 const div=document.getElementById("pollArea");
-
 div.innerHTML="";
 
 const card=document.createElement("div");
-
 card.className="poll-card";
-
 card.innerHTML=`<h2>${poll.name}</h2>`;
+
+let selected=[];
 
 poll.candidates.forEach(c=>{
 
 const el=document.createElement("div");
-
 el.className="candidate";
-
 el.innerText=c;
 
-el.onclick=()=>vote(code,c,voterCode);
+el.onclick=()=>{
+
+if(selected.includes(c)){
+selected=selected.filter(x=>x!==c);
+el.style.background="#e0f7fa";
+}else{
+
+if(selected.length >= (poll.maxVotesPerCode || 1)){
+alert("אפשר לבחור עד "+(poll.maxVotesPerCode || 1)+" מועמדים");
+return;
+}
+
+selected.push(c);
+el.style.background="#4dd0e1";
+}
+
+};
 
 card.appendChild(el);
 
 });
 
-div.appendChild(card);
+const submitBtn=document.createElement("button");
+submitBtn.innerText="הגש הצבעה";
 
+submitBtn.onclick=()=>submitVote(code,selected,voterCode);
+
+card.appendChild(submitBtn);
+
+div.appendChild(card);
 }
 
-function vote(pollCode,candidate,voterCode){
+function submitVote(pollCode,selected,voterCode){
 
-polls[pollCode].votes[candidate]=(polls[pollCode].votes[candidate]||0)+1;
+if(selected.length===0){
+alert("לא בחרת אף מועמד");
+return;
+}
+
+selected.forEach(c=>{
+polls[pollCode].votes[c]=(polls[pollCode].votes[c]||0)+1;
+});
 
 polls[pollCode].usedCodes.push(voterCode);
 
 localStorage.setItem("polls",JSON.stringify(polls));
 
 alert("ההצבעה נשמרה");
-
 location.reload();
-
 }
 
 </script>
