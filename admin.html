@@ -52,8 +52,6 @@ box-shadow:0 4px 10px rgba(0,0,0,0.2);
 <input id="pollName" placeholder="שם קלפי">
 <input id="candidates" placeholder="מועמדים (פסיקים)">
 <input id="voterCount" type="number" placeholder="מספר מצביעים">
-
-<!-- הוספנו רק את זה -->
 <input id="maxVotes" type="number" placeholder="כמה בחירות לכל קוד (1-10)">
 
 <button onclick="createPoll()">צור קלפי</button>
@@ -68,6 +66,7 @@ box-shadow:0 4px 10px rgba(0,0,0,0.2);
 <hr>
 
 <div id="pollList"></div>
+
 <canvas id="chart"></canvas>
 
 <script>
@@ -83,7 +82,10 @@ function createPoll(){
 const name=document.getElementById("pollName").value;
 const candidates=document.getElementById("candidates").value.split(",");
 const count=parseInt(document.getElementById("voterCount").value);
-const maxVotes=parseInt(document.getElementById("maxVotes").value) || 1;
+
+let maxVotes=parseInt(document.getElementById("maxVotes").value);
+if(isNaN(maxVotes) || maxVotes < 1) maxVotes = 1;
+if(maxVotes > 10) maxVotes = 10;
 
 const pollCode=randomCode();
 
@@ -93,14 +95,12 @@ codes.push(randomCode());
 }
 
 polls[pollCode]={
-
 name:name,
 candidates:candidates,
 votes:{},
 codes:codes,
 usedCodes:[],
 maxVotesPerCode:maxVotes
-
 };
 
 localStorage.setItem("polls",JSON.stringify(polls));
@@ -131,6 +131,7 @@ card.className="poll-card";
 card.innerHTML=`
 <h3>${poll.name}</h3>
 <p>קוד קלפי: ${code}</p>
+<p>מותר לבחור: ${poll.maxVotesPerCode || 1}</p>
 <button onclick="showCodes('${code}')">קודי הצבעה</button>
 <button onclick="showResults('${code}')">גרף תוצאות</button>
 `;
