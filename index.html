@@ -29,10 +29,6 @@ font-weight:bold;
 cursor:pointer;
 }
 
-button:hover{
-background:#0097a7;
-}
-
 .poll-card{
 background:white;
 padding:20px;
@@ -116,6 +112,8 @@ card.innerHTML=`<h2>${poll.name}</h2>`;
 
 let selected=[];
 
+const maxVotes = poll.maxVotesPerCode ? parseInt(poll.maxVotesPerCode) : 1;
+
 poll.candidates.forEach(c=>{
 
 const el=document.createElement("div");
@@ -129,8 +127,8 @@ selected=selected.filter(x=>x!==c);
 el.style.background="#e0f7fa";
 }else{
 
-if(selected.length >= (poll.maxVotesPerCode || 1)){
-alert("אפשר לבחור עד "+(poll.maxVotesPerCode || 1)+" מועמדים");
+if(selected.length >= maxVotes){
+alert("אפשר לבחור עד "+maxVotes+" מועמדים");
 return;
 }
 
